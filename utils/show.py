@@ -4,8 +4,8 @@ import os
 
 if __name__ == '__main__':
 
-    train_file = open("../checkpoint/vgg16_each_epoch_record_train.txt", 'r')
-    test_file = open('../checkpoint/vgg16_each_epoch_record_val.txt', 'r')
+    train_file = open("../checkpoint/BCNN_each_epoch_record_train.txt", 'r')
+    test_file = open('../checkpoint/BCNN_each_epoch_record_val.txt', 'r')
 
     train_total = train_file.readlines()
     test_total = test_file.readlines()
