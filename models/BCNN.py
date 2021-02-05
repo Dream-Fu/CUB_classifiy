@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torchvision.models as m
 import torch as t
+from torchsummary import summary
 
 class BCNN(nn.Module):
     def __init__(self):
@@ -15,11 +16,11 @@ class BCNN(nn.Module):
                                       resnet50.layer3,
                                       resnet50.layer4)
         self.fc = nn.Linear(2048*2048, 200)
-        for param in self.features.parameters():
-            param.requires_grad = True
-        t.nn.init.kaiming_normal_(self.fc.weight.data)
-        if self.fc.bias is not None:
-            t.nn.init.constant_(self.fc.bias.data, val=0)
+        # for param in self.features.parameters():
+        #     param.requires_grad = True
+        # t.nn.init.kaiming_normal_(self.fc.weight.data)
+        # if self.fc.bias is not None:
+        #     t.nn.init.constant_(self.fc.bias.data, val=0)
 
     def forward(self, x):
         out = self.features(x)
@@ -41,7 +42,8 @@ class BCNN(nn.Module):
 if __name__ == '__main__':
     # pre_dict = m.vgg16(pretrained=True)
     # print(pre_dict)
-    model = BCNN()
+    model = BCNN().cuda()
     input = t.randn((1, 3, 256, 256))
-    out = model(input)
-    print(out.shape)
+    # out = model(input)
+    # print(out.shape)
+    summary(model, (3, 256, 256))
