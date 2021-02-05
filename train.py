@@ -57,23 +57,23 @@ if __name__ == '__main__':
     optimizer = optim.SGD(model.parameters(), lr=opt.learning_rate, momentum=0.9, weight_decay=1e-4)
     criterion = nn.CrossEntropyLoss()
     # 加载模型
-    model, optimizer, start_epoch = utils.load_checkpoint(model, optimizer, './checkpoint/best_model.pth')
+    model, optimizer, start_epoch = utils.load_checkpoint(model, optimizer, './checkpoint/checkpoint.pth')
 
 
 
     best_precision = 0
     lowest_loss = 0
-    for epoch in range(opt.epochs):
+    for epoch in range(1, opt.epochs+1):
         acc_train, loss_train = utils.train(train_data, model, criterion,optimizer, epoch+start_epoch, opt.print_interval,
                                             opt.checkpoint_dir)
         # 在日志文件中记录每个epoch的训练精度和损失
-        with open(opt.checkpoint_dir + 'each_epoch_record_train.txt', 'a') as acc_file:
-            acc_file.write('Epoch: %2d, train_Precision: %.8f, train_Loss: %.8f\n' % (epoch, acc_train, loss_train))
+        with open(opt.checkpoint_dir + opt.model + '_each_epoch_record_train.txt', 'a') as acc_file:
+            acc_file.write('Epoch: %2d, train_Precision: %.8f, train_Loss: %.8f\n' % (epoch+start_epoch, acc_train, loss_train))
 
         precision, avg_loss = utils.validate(test_data, model, criterion, opt.print_interval, opt.checkpoint_dir)
         # 在日志文件中记录每个epoch的验证精度和损失
-        with open(opt.checkpoint_dir + 'each_epoch_record_val.txt', 'a') as acc_file:
-            acc_file.write('Epoch: %2d, Precision: %.8f, Loss: %.8f\n' % (epoch, precision, avg_loss))
+        with open(opt.checkpoint_dir+ opt.model + '_each_epoch_record_val.txt', 'a') as acc_file:
+            acc_file.write('Epoch: %2d, Precision: %.8f, Loss: %.8f\n' % (epoch+start_epoch, precision, avg_loss))
             pass
 
         print('--' * 30)
@@ -83,8 +83,8 @@ if __name__ == '__main__':
               'Previous Lowest Loss: %.3f)' % lowest_loss)
         print('--' * 30)
         # 保存最新模型
-        save_path = os.path.join(opt.checkpoint_dir, 'checkpoint.pth')
-        t.save({'epoch': epoch, 'state_dict': model.state_dict(), 'loss': loss_train,
+        save_path = os.path.join(opt.checkpoint_dir, opt.model + '_checkpoint.pth')
+        t.save({'epoch': epoch+start_epoch, 'state_dict': model.state_dict(), 'loss': loss_train,
                 'optimizer': optimizer.state_dict()}, save_path)
 
         # 记录最高精度与最低loss
@@ -95,9 +95,9 @@ if __name__ == '__main__':
 
         # 保存准确率最高的模型
         if is_best:
-            best_path = os.path.join(opt.checkpoint_dir, 'best_model.pth')
+            best_path = os.path.join(opt.checkpoint_dir, opt.model + '_best_model.pth')
             shutil.copyfile(save_path, best_path)
         # 保存损失最低的模型
         if is_lowest_loss:
-            lowest_path = os.path.join(opt.checkpoint_dir, 'lowest_loss.pth')
+            lowest_path = os.path.join(opt.checkpoint_dir, opt.model + '_lowest_loss.pth')
             shutil.copyfile(save_path, lowest_path)

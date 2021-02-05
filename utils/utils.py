@@ -4,6 +4,7 @@ import numpy as np
 import os
 import pandas as pd
 from tqdm import tqdm
+import torch.nn as nn
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 def creatdir(filename):
@@ -78,8 +79,7 @@ def train(train_loader, model, criterion, optimizer, epoch, print_interval,filen
         images = images.to(device)
         labels = torch.from_numpy(np.array(labels)).long().to(device)
         # 梯度归零
-        if epoch == 0:
-            optimizer.zero_grad()
+        optimizer.zero_grad()
         # 将图片输入网络，前传，生成预测值
         # output,aux = model(images)
         output = model(images)
@@ -175,8 +175,10 @@ def to_csv(test_loader, model, file_path, title=['id', 'label']):
 def load_checkpoint(model, optimizer, checkpoint_PATH):
     start_epoch = 0
     if os.path.exists(checkpoint_PATH):
+        model.cuda()
         model_CKPT = torch.load(checkpoint_PATH)
-        model.load_state_dict(model_CKPT['state_dict'])
+        model = nn.DataParallel(model)
+        model.load_state_dict(model_CKPT['state_dict'], False)
         optimizer.load_state_dict(model_CKPT['optimizer'])
         start_epoch = model_CKPT['epoch']
         print('Load last checkpoint data')
