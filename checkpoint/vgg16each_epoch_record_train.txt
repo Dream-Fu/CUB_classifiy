@@ -1,0 +1,10 @@
+Epoch:  0, train_Precision: 1.83333333, train_Loss: 5.29379916
+Epoch:  1, train_Precision: 13.36666667, train_Loss: 5.25264935
+Epoch:  2, train_Precision: 21.43333333, train_Loss: 5.19670613
+Epoch:  3, train_Precision: 24.76666667, train_Loss: 5.13217384
+Epoch:  4, train_Precision: 31.16666667, train_Loss: 5.06106225
+Epoch:  5, train_Precision: 34.50000000, train_Loss: 4.98532965
+Epoch:  6, train_Precision: 35.96666667, train_Loss: 4.90490681
+Epoch:  7, train_Precision: 39.56666667, train_Loss: 4.82167281
+Epoch:  8, train_Precision: 40.46666667, train_Loss: 4.73367411
+Epoch:  9, train_Precision: 46.50000000, train_Loss: 4.64436236

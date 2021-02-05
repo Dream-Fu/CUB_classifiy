@@ -6,14 +6,16 @@ from models.vgg16 import vgg16
 from models.BCNN import BCNN
 import torch.optim as optim
 import torch.nn as nn
-
+import os
 import argparse
+import shutil
+
 
 parser = argparse.ArgumentParser()
 # 数据集路径
 parser.add_argument('--file_path', type=str, default= './data/lists/train.txt', help='whether to train.txt')
 parser.add_argument('--train_path', type=str, default= './data/images/', help='whether to train img')
-parser.add_argument('--val_path', type=str, default= '', help='whether to val.txt')
+parser.add_argument('--val_path', type=str, default= './data/lists/test.txt', help='whether to val.txt')
 # 模型及数据存储路径
 parser.add_argument('--checkpoint_dir', type=str, default='./checkpoint/', help='directory where model checkpoints are saved')
 # 网络选择
@@ -37,9 +39,15 @@ parser.add_argument('--print_interval', type=int, default=100, help='interval be
 # 确认参数，并可以通过opt.xx的形式在程序中使用该参数
 opt = parser.parse_args()
 device = t.device('cuda' if t.cuda.is_available() else 'cpu')
+
+
 if __name__ == '__main__':
-    dataset = cub_dataset(opt.file_path, opt.train_path)
-    train_data = DataLoader(dataset, batch_size=opt.batch_size, shuffle=True, num_workers=opt.n_cpu)
+
+    train_dataset = cub_dataset(opt.file_path, opt.train_path)
+    train_data = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=True, num_workers=opt.n_cpu)
+    test_dataset = cub_dataset(opt.val_path, opt.train_path)
+    test_data = DataLoader(test_dataset, batch_size=opt.batch_size, shuffle=False)
+
     if opt.model == 'vgg16':
         model = vgg16()
     elif opt.model == 'BCNN':
@@ -56,3 +64,34 @@ if __name__ == '__main__':
         # 在日志文件中记录每个epoch的训练精度和损失
         with open(opt.checkpoint_dir + 'each_epoch_record_train.txt', 'a') as acc_file:
             acc_file.write('Epoch: %2d, train_Precision: %.8f, train_Loss: %.8f\n' % (epoch, acc_train, loss_train))
+
+        precision, avg_loss = utils.validate(test_data, model, criterion, opt.print_interval, opt.checkpoint_dir)
+        # 在日志文件中记录每个epoch的验证精度和损失
+        with open(opt.checkpoint_dir + 'each_epoch_record_val.txt', 'a') as acc_file:
+            acc_file.write('Epoch: %2d, Precision: %.8f, Loss: %.8f\n' % (epoch, precision, avg_loss))
+            pass
+
+        print('--' * 30)
+        print(' * Accuray {acc:.3f}'.format(acc=precision),
+              '(Previous Best Acc: %.3f)' % best_precision,
+              ' * Loss {loss:.3f}'.format(loss=avg_loss),
+              'Previous Lowest Loss: %.3f)' % lowest_loss)
+        print('--' * 30)
+        # 保存最新模型
+        save_path = os.path.join(opt.checkpoint_dir, 'checkpoint.pth')
+        t.save(model.state_dict(), save_path)
+
+        # 记录最高精度与最低loss
+        is_best = precision > best_precision
+        is_lowest_loss = avg_loss < lowest_loss
+        best_precision = max(precision, best_precision)
+        lowest_loss = min(avg_loss, lowest_loss)
+
+        # 保存准确率最高的模型
+        if is_best:
+            best_path = os.path.join(opt.checkpoint_dir, 'best_model.pth')
+            shutil.copyfile(save_path, best_path)
+        # 保存损失最低的模型
+        if is_lowest_loss:
+            lowest_path = os.path.join(opt.checkpoint_dir, 'lowest_loss.pth')
+            shutil.copyfile(save_path, lowest_path)

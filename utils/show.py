@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 if __name__ == '__main__':
 
-    train_file = open("../checkpoint/record_iter_train.txt", 'r')
+    train_file = open("../checkpoint/vgg16each_epoch_record_train.txt", 'r')
     train_total = train_file.readlines()
     train_num = len(train_total)
     train_res = np.zeros(train_num)
@@ -13,9 +14,9 @@ if __name__ == '__main__':
 
     for idx in range(train_num):
         train_str = train_total[idx].split(',')
-        train_acc = float(train_str[0].split(':')[-1])
+        train_acc = float(train_str[1].split(':')[-1])
         acc_list.append(train_acc)
-        train_loss = float(train_str[1].split(':')[-1])
+        train_loss = float(train_str[2].split(':')[-1])
         loss_list.append(train_loss)
 
     plt.figure()
