@@ -38,6 +38,7 @@ parser.add_argument('--start_epoch', type=int, default=0, help='number of start 
 parser.add_argument('--print_interval', type=int, default=100, help='interval between print log')
 # 确认参数，并可以通过opt.xx的形式在程序中使用该参数
 opt = parser.parse_args()
+
 device = t.device('cuda' if t.cuda.is_available() else 'cpu')
 
 
@@ -58,7 +59,7 @@ if __name__ == '__main__':
     # 加载模型
     model, optimizer, start_epoch = utils.load_checkpoint(model, optimizer, './checkpoint/best_model.pth')
 
-    model.to(device)
+
 
     best_precision = 0
     lowest_loss = 0

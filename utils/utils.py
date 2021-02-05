@@ -67,6 +67,7 @@ def train(train_loader, model, criterion, optimizer, epoch, print_interval,filen
     acc = AverageMeter()
     # 转换为训练模式
     model.train()
+    model.to(device)
     # 时间记录
     end = time.time()
     # 从训练集迭代器中获取训练数据
@@ -74,10 +75,11 @@ def train(train_loader, model, criterion, optimizer, epoch, print_interval,filen
         # 评估图片读取耗时
         data_time.update(time.time() - end)
         # 将图片和标签转化为cuda
-        images = images.cuda()
-        labels = torch.from_numpy(np.array(labels)).long().cuda()
+        images = images.to(device)
+        labels = torch.from_numpy(np.array(labels)).long().to(device)
         # 梯度归零
-        optimizer.zero_grad()
+        if epoch == 0:
+            optimizer.zero_grad()
         # 将图片输入网络，前传，生成预测值
         # output,aux = model(images)
         output = model(images)
