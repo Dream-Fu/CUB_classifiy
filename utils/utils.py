@@ -2,8 +2,10 @@ import torch
 import time
 import numpy as np
 import os
+import pandas as pd
+from tqdm import tqdm
 
-
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 def creatdir(filename):
     # 创建存储文件
     if not os.path.exists(filename):
@@ -166,3 +168,16 @@ def to_csv(test_loader, model, file_path, title=['id', 'label']):
             result_list.append({title[0]: id, title[1]: label})
     df = pd.DataFrame(result_list, columns=title)
     df.to_csv(file_path, index=False)
+
+
+def load_checkpoint(model, optimizer, checkpoint_PATH):
+    start_epoch = 0
+    if os.path.exists(checkpoint_PATH):
+        model_CKPT = torch.load(checkpoint_PATH)
+        model.load_state_dict(model_CKPT['state_dict'])
+        optimizer.load_state_dict(model_CKPT['optimizer'])
+        start_epoch = model_CKPT['epoch']
+        print('Load last checkpoint data')
+    else:
+        print('Start from scratch')
+    return model, optimizer, start_epoch

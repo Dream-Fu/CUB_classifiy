@@ -52,14 +52,18 @@ if __name__ == '__main__':
         model = vgg16()
     elif opt.model == 'BCNN':
         model = BCNN()
-    model.to(device)
+
     optimizer = optim.SGD(model.parameters(), lr=opt.learning_rate, momentum=0.9, weight_decay=1e-4)
     criterion = nn.CrossEntropyLoss()
+    # 加载模型
+    model, optimizer, start_epoch = utils.load_checkpoint(model, optimizer, './checkpoint/best_model.pth')
+
+    model.to(device)
 
     best_precision = 0
     lowest_loss = 0
     for epoch in range(opt.epochs):
-        acc_train, loss_train = utils.train(train_data, model, criterion,optimizer, epoch, opt.print_interval,
+        acc_train, loss_train = utils.train(train_data, model, criterion,optimizer, epoch+start_epoch, opt.print_interval,
                                             opt.checkpoint_dir)
         # 在日志文件中记录每个epoch的训练精度和损失
         with open(opt.checkpoint_dir + 'each_epoch_record_train.txt', 'a') as acc_file:
@@ -79,7 +83,8 @@ if __name__ == '__main__':
         print('--' * 30)
         # 保存最新模型
         save_path = os.path.join(opt.checkpoint_dir, 'checkpoint.pth')
-        t.save(model.state_dict(), save_path)
+        t.save({'epoch': epoch, 'state_dict': model.state_dict(), 'loss': loss_train,
+                'optimizer': optimizer.state_dict()}, save_path)
 
         # 记录最高精度与最低loss
         is_best = precision > best_precision
